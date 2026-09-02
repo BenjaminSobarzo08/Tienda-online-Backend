@@ -185,6 +185,33 @@ const actualizarProducto = async (req, res) => {
     }
 };
 
+// Descuenta una unidad de stock de forma atomica al confirmar una compra.
+// Esta operacion no reutiliza la edicion del producto porque un comprador no
+// tiene por que ser el propietario de la publicacion.
+const comprarProducto = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const producto = await Producto.findOneAndUpdate(
+            { _id: id, stock: { $gt: 0 } },
+            { $inc: { stock: -1 } },
+            { new: true, runValidators: true }
+        ).populate('usuario', 'userName email');
+
+        if (!producto) {
+            const existeProducto = await Producto.exists({ _id: id });
+            return res.status(existeProducto ? 409 : 404).json({
+                message: existeProducto ? "Stock insuficiente" : "Producto no encontrado"
+            });
+        }
+
+        res.status(200).json({ message: "Compra confirmada", producto });
+    } catch (error) {
+        console.error("Error confirmando compra:", error);
+        res.status(500).json({ message: "Error confirmando compra" });
+    }
+};
+
 // Controlador para eliminar un producto
 const eliminarProducto = async (req, res) => {
     const { id } = req.params;
@@ -235,5 +262,6 @@ module.exports = {
     obtenerProducto,
     crearProducto,
     actualizarProducto,
+    comprarProducto,
     eliminarProducto
 };
