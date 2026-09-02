@@ -8,6 +8,7 @@ const {
     obtenerProducto,
     crearProducto,
     actualizarProducto,
+    comprarProducto,
     eliminarProducto
 } = require('../controllers/productoController');
 
@@ -15,6 +16,7 @@ const {
 router.get('/', obtenerProductos); // Ruta para obtener todos los productos
 router.get('/:id', obtenerProducto)
 router.post('/', Autorizacion, upload.array('imagenes', 5), crearProducto); // Ruta para crear un nuevo producto
+router.post('/:id/comprar', Autorizacion, comprarProducto); // Ruta para confirmar una compra
 router.put('/:id', Autorizacion, upload.array('imagenes', 5), actualizarProducto); // Ruta para actualizar un producto existente
 router.delete('/:id', Autorizacion, eliminarProducto); // Ruta para eliminar un producto
 
